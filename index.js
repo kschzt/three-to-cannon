@@ -109,10 +109,16 @@ function createBoundingBoxShape (object) {
 
   if (!isFinite(box.min.lengthSq())) return null;
 
+  const halfExtents = {
+    x: (box.max.x - box.min.x) / 2,
+    y: (box.max.y - box.min.y) / 2,
+    z: (box.max.z - box.min.z) / 2,
+  }
+
   shape = new CANNON.Box(new CANNON.Vec3(
-    (box.max.x - box.min.x) / 2,
-    (box.max.y - box.min.y) / 2,
-    (box.max.z - box.min.z) / 2
+    Math.floor(halfExtents.x * 10000) / 10000,
+    Math.floor(halfExtents.y * 10000) / 10000,
+    Math.floor(halfExtents.z * 10000) / 10000
   ));
 
   localPosition = box.translate(clone.position.negate()).getCenter();
