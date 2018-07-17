@@ -3,6 +3,8 @@ var CANNON = require('cannon'),
 
 var PI_2 = Math.PI / 2;
 
+var Box = require('./box');
+
 var Type = {
   BOX: 'Box',
   CYLINDER: 'Cylinder',
@@ -97,15 +99,20 @@ module.exports = CANNON.mesh2shape = mesh2shape;
  * @param  {THREE.Object3D} mesh
  * @return {CANNON.Shape}
  */
-function createBoundingBoxShape (object) {
+function createBoundingBoxShape(object) {
   var shape, localPosition, worldPosition,
       box = new THREE.Box3();
 
-  var clone = object.clone();
-  clone.quaternion.set(0, 0, 0, 1);
-  clone.updateMatrixWorld();
+  // reset rotation for measurement
+  let oldQuat = object.quaternion.clone();
+  object.quaternion.set(0, 0, 0, 1);
+  object.updateMatrixWorld(true);
 
-  box.setFromObject(clone);
+  box = new THREE.Box3().setFromObject(object);
+
+  // set old rotation back
+  object.quaternion.copy(oldQuat);
+  object.updateMatrixWorld(true);
 
   if (!isFinite(box.min.lengthSq())) return null;
 
@@ -121,9 +128,14 @@ function createBoundingBoxShape (object) {
     Math.floor(halfExtents.z * 10000) / 10000
   ));
 
-  localPosition = box.translate(clone.position.negate()).getCenter();
+  localPosition = box.translate(object.position.negate()).getCenter();
+
   if (localPosition.lengthSq()) {
-    shape.offset = localPosition;
+    shape.offset = {
+      x: Math.floor(localPosition.x * 10000) / 10000,
+      y: Math.floor(localPosition.y * 10000) / 10000,
+      z: Math.floor(localPosition.z * 10000) / 10000,
+    }
   }
 
   return shape;
