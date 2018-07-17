@@ -3,8 +3,6 @@ var CANNON = require('cannon'),
 
 var PI_2 = Math.PI / 2;
 
-var Box = require('./box');
-
 var Type = {
   BOX: 'Box',
   CYLINDER: 'Cylinder',
